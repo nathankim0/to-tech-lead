@@ -1,0 +1,36 @@
+name: 링크 검사
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 매주 월요일 오전 9시 (KST) 실행
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check-links:
+    name: 링크 유효성 검사
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 링크 검사 실행
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --no-progress
+            --exclude "^mailto:"
+            --exclude "^https://github.com/nathankim0/to-tech-lead/(edit|new)"
+            './**/*.md'
+          fail: false
+
+      - name: 검사 결과 요약
+        if: always()
+        run: |
+          echo "## 링크 검사 완료" >> $GITHUB_STEP_SUMMARY
+          echo "상세 결과는 위 로그를 확인해주세요." >> $GITHUB_STEP_SUMMARY
